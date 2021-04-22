@@ -1,0 +1,68 @@
+{
+  "name": "@hexlet/code",
+  "version": "0.0.1",
+  "description": "RSS агрегатор",
+  "main": "src/index.js",
+  "bin": {},
+  "engines": {
+    "node": ">=14"
+  },
+  "scripts": {
+    "test": "npx jest",
+    "start": "npx webpack serve",
+    "build": "NODE_ENV=production webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aminin/frontend-project-lvl3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aminin/frontend-project-lvl3/issues"
+  },
+  "homepage": "https://github.com/aminin/frontend-project-lvl3#readme",
+  "dependencies": {
+    "@babel/register": "^7.13.14",
+    "@babel/runtime": "^7.13.10",
+    "bootstrap": "^4.6.0",
+    "jquery": "^3.6.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.15",
+    "@babel/preset-env": "^7.13.15",
+    "autoprefixer": "^10.2.5",
+    "babel-loader": "^8.2.2",
+    "css-loader": "^5.2.2",
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-functional": "^3.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.5",
+    "eslint-plugin-jest-dom": "^3.8.0",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-testing-library": "^4.0.2",
+    "html-webpack-plugin": "^5.3.1",
+    "jest": "^26.6.3",
+    "mini-css-extract-plugin": "^1.5.0",
+    "nock": "^13.0.11",
+    "node-sass": "^5.0.0",
+    "postcss": "^8.2.10",
+    "postcss-loader": "^5.2.0",
+    "postcss-preset-env": "^6.7.0",
+    "sass-loader": "^11.0.1",
+    "style-loader": "^2.0.0",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.33.2",
+    "webpack-cli": "^4.6.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {},
+    "testMatch": [
+      "**/?(*.)+(spec|test).[jt]s?(x)"
+    ]
+  }
+}
