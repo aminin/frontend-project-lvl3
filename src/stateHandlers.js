@@ -85,16 +85,34 @@ const handlePosts = (elements, state, translate) => {
         <li class="list-group-item d-flex justify-content-between align-items-start">
           <a
               href="${link}"
-              class="${ui.seenPosts.has(id) ? 'font-weight-normal' : 'font-weight-bold'}"
+              class="${ui.seenPosts.has(String(id)) ? 'font-weight-normal' : 'font-weight-bold'}"
               data-id="${id}"
               target="_blank"
               rel="noopener noreferrer"
           >${stripMarkup(title)}</a>
+          <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              data-id="${id}"
+              data-toggle="modal"
+              data-target="#modal"
+          >${translate('preview')}</button>
         </li>
       `)).join('\n')}
     </ul>
   `;
   postsEl.appendChild(fragment);
+};
+
+const handlePreviewPost = (elements, state) => {
+  const post = state.posts.find((postData) => postData.id === state.modal.postId);
+  const title = elements.modal.querySelector('.modal-title');
+  const body = elements.modal.querySelector('.modal-body');
+  const fullArticleLink = elements.modal.querySelector('.full-article');
+
+  title.textContent = post.title;
+  body.textContent = post.description;
+  fullArticleLink.href = post.link;
 };
 
 const attachStateHandlers = (elements, initialState, translate) => (
@@ -104,6 +122,8 @@ const attachStateHandlers = (elements, initialState, translate) => (
       'loadingProcess.status': handleLoadingProcessStatus,
       feeds: handleFeeds,
       posts: handlePosts,
+      'ui.seenPosts': handlePosts,
+      'modal.postId': handlePreviewPost,
     };
     return handlers[path] && handlers[path](elements, initialState, translate);
   })

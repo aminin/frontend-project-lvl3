@@ -1,7 +1,9 @@
+import 'bootstrap';
 import * as yup from 'yup';
 import axios from 'axios';
 import uniqueId from 'lodash/uniqueId';
 import differenceWith from 'lodash/differenceWith';
+import has from 'lodash/has';
 import i18next from 'i18next';
 
 import parseRss from './parseRss';
@@ -117,6 +119,9 @@ export default () => {
       error: null,
       status: 'idle', // failed idle loading
     },
+    modal: {
+      postId: null,
+    },
     ui: {
       seenPosts: new Set(),
     },
@@ -150,6 +155,18 @@ export default () => {
         };
       }
     });
+
+    // Делегируем клик по посту, чтобы оталедить просмотр.
+    elements.posts.addEventListener('click', (e) => {
+      if (!has(e.target.dataset, 'id')) {
+        return;
+      }
+
+      const { id } = e.target.dataset;
+      state.modal.postId = String(id);
+      state.ui.seenPosts.add(id);
+    });
+
     setTimeout(() => fetchUpdates(state), RSS_UPDATE_TIMEOUT);
   });
 };
