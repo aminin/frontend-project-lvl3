@@ -19,34 +19,32 @@ const renderFeedback = (elements, type, message) => {
   feedback.textContent = message;
 };
 
-const handleForm = (elements, state) => {
+const handleForm = (elements, state, translate) => {
   const { form: { valid, error } } = state;
   const { input } = elements;
   if (valid) {
     input.classList.remove('is-invalid');
   } else {
-    // eslint-disable-next-line no-console
-    console.log('error', error);
     input.classList.add('is-invalid');
-    renderFeedback(elements, 'danger', error);
+    renderFeedback(elements, 'danger', translate([`errors.${error}`, 'errors.unknown']));
   }
 };
 
-const handleLoadingProcessStatus = (elements, state) => {
+const handleLoadingProcessStatus = (elements, state, translate) => {
   const { loadingProcess } = state;
   const { submit, input } = elements;
   switch (loadingProcess.status) {
     case 'failed':
       submit.disabled = false;
       input.removeAttribute('readonly');
-      renderFeedback(elements, 'danger', loadingProcess.error);
+      renderFeedback(elements, 'danger', translate([`errors.${loadingProcess.error}`, 'errors.unknown']));
       break;
     case 'idle':
       submit.disabled = false;
       input.removeAttribute('readonly');
       input.value = '';
-      renderFeedback(elements, 'success', 'RSS успешно загружен');
       input.focus();
+      renderFeedback(elements, 'success', translate('loading.success'));
       break;
     case 'loading':
       submit.disabled = true;
@@ -58,12 +56,12 @@ const handleLoadingProcessStatus = (elements, state) => {
   }
 };
 
-const handleFeeds = (elements, state) => {
+const handleFeeds = (elements, state, translate) => {
   const { feeds } = state;
   const { feeds: feedsEl } = elements;
   const fragment = document.createDocumentFragment();
   feedsEl.innerHTML = `
-    <h2>Фиды</h2>
+    <h2>${translate('feeds')}</h2>
     <ul class="list-group mb-5">
       ${feeds.map(({ title, description }) => (`
         <li class="list-group-item">
@@ -76,12 +74,12 @@ const handleFeeds = (elements, state) => {
   feedsEl.appendChild(fragment);
 };
 
-const handlePosts = (elements, state) => {
+const handlePosts = (elements, state, translate) => {
   const { posts, ui } = state;
   const { posts: postsEl } = elements;
   const fragment = document.createDocumentFragment();
   postsEl.innerHTML = `
-    <h2>Посты</h2>
+    <h2>${translate('posts')}</h2>
     <ul class="list-group">
       ${posts.map(({ id, title, link }) => (`
         <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -99,14 +97,16 @@ const handlePosts = (elements, state) => {
   postsEl.appendChild(fragment);
 };
 
-const attachStateHandlers = (elements, initialState) => onChange(initialState, (path) => {
-  const handlers = {
-    form: handleForm,
-    'loadingProcess.status': handleLoadingProcessStatus,
-    feeds: handleFeeds,
-    posts: handlePosts,
-  };
-  return handlers[path] && handlers[path](elements, initialState);
-});
+const attachStateHandlers = (elements, initialState, translate) => (
+  onChange(initialState, (path) => {
+    const handlers = {
+      form: handleForm,
+      'loadingProcess.status': handleLoadingProcessStatus,
+      feeds: handleFeeds,
+      posts: handlePosts,
+    };
+    return handlers[path] && handlers[path](elements, initialState, translate);
+  })
+);
 
 export default attachStateHandlers;

@@ -5,7 +5,7 @@ export default (data) => {
   const dom = parser.parseFromString(data, 'text/xml');
 
   if (dom.querySelectorAll('parsererror').length > 0) {
-    const error = new Error(getText('parsererror'));
+    const error = new Error(getText(dom, 'parsererror'));
     error.code = 'rss_parse_error';
     throw error;
   }

@@ -1,10 +1,12 @@
 import * as yup from 'yup';
 import axios from 'axios';
 import uniqueId from 'lodash/uniqueId';
+import i18next from 'i18next';
 
 import parseRss from './parseRss';
 import attachStateHandlers from './stateHandlers';
 import { RSS_LOAD_TIMEOUT, RSS_PROXY_URL } from './constants';
+import locales from './locales/index';
 
 const decorateUrlWithProxy = (url) => {
   const decorated = new URL('/get', RSS_PROXY_URL);
@@ -35,7 +37,12 @@ const validateUrl = (url, feeds) => {
 
 // Код добавим какой нужно, если нет.
 // Кстати, МБ можно полагаться на message.
-const getErrorCode = (e) => e.code ?? 'unknown';
+const getErrorCode = (e) => {
+  if (e.isAxiosError) {
+    e.code = 'network_error';
+  }
+  return e.code ?? 'unknown';
+};
 
 const loadRss = (state, url) => {
   state.loadingProcess.status = 'loading';
@@ -48,7 +55,8 @@ const loadRss = (state, url) => {
       const posts = items.map((item) => ({ ...item, channelId: feed.id, id: uniqueId() }));
       state.posts.unshift(...posts);
       state.feeds.unshift(feed);
-      state.loadingProcess = { error: null, status: 'idle' };
+      state.loadingProcess.error = null;
+      state.loadingProcess.status = 'idle';
       state.form = {
         ...state.form,
         error: null,
@@ -57,7 +65,8 @@ const loadRss = (state, url) => {
     .catch((e) => {
       // eslint-disable-next-line no-console
       console.error(e);
-      state.loadingProcess = { error: getErrorCode(e), status: 'failed' };
+      state.loadingProcess.error = getErrorCode(e);
+      state.loadingProcess.status = 'failed';
     })
     .finally(() => {
     // Для отладки
@@ -91,26 +100,33 @@ export default () => {
     },
   };
 
-  const state = attachStateHandlers(elements, initialState);
+  // return Promise
+  return i18next.createInstance().init({
+    lng: 'ru',
+    debug: false,
+    resources: locales,
+  }).then((translate) => {
+    const state = attachStateHandlers(elements, initialState, translate);
 
-  elements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(e.target);
-    const url = data.get('url');
-    const error = validateUrl(url, state.feeds);
-    if (!error) {
-      state.form = {
-        ...state.form,
-        valid: true,
-        error: null,
-      };
-      loadRss(state, url);
-    } else {
-      state.form = {
-        ...state.form,
-        valid: false,
-        error: getErrorCode(error),
-      };
-    }
+    elements.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const url = data.get('url');
+      const error = validateUrl(url, state.feeds);
+      if (!error) {
+        state.form = {
+          ...state.form,
+          valid: true,
+          error: null,
+        };
+        loadRss(state, url);
+      } else {
+        state.form = {
+          ...state.form,
+          valid: false,
+          error: getErrorCode(error),
+        };
+      }
+    });
   });
 };
