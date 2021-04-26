@@ -1,11 +1,12 @@
 import * as yup from 'yup';
 import axios from 'axios';
 import uniqueId from 'lodash/uniqueId';
+import differenceWith from 'lodash/differenceWith';
 import i18next from 'i18next';
 
 import parseRss from './parseRss';
 import attachStateHandlers from './stateHandlers';
-import { RSS_LOAD_TIMEOUT, RSS_PROXY_URL } from './constants';
+import { RSS_LOAD_TIMEOUT, RSS_UPDATE_TIMEOUT, RSS_PROXY_URL } from './constants';
 import locales from './locales/index';
 
 const decorateUrlWithProxy = (url) => {
@@ -73,6 +74,27 @@ const loadRss = (state, url) => {
     });
 };
 
+const fetchUpdates = (state) => {
+  const promises = state.feeds.map((feed) => axios.get(decorateUrlWithProxy(feed.url))
+    .then(({ data }) => {
+      const { items } = parseRss(data.contents);
+      const newPosts = items.map((item) => ({ ...item, channelId: feed.id }));
+      const oldPosts = state.posts.filter((post) => post.channelId === feed.id);
+      const posts = differenceWith(newPosts, oldPosts, (p1, p2) => p1.link === p2.link)
+        .map((post) => ({ ...post, id: uniqueId() }));
+      if (posts.length > 0) {
+        state.posts.unshift(...posts);
+      }
+    })
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }));
+  Promise.all(promises).finally(() => {
+    setTimeout(() => fetchUpdates(state), RSS_UPDATE_TIMEOUT);
+  });
+};
+
 export default () => {
   const elements = applySelectors({
     form: '.rss-form',
@@ -128,5 +150,6 @@ export default () => {
         };
       }
     });
+    setTimeout(() => fetchUpdates(state), RSS_UPDATE_TIMEOUT);
   });
 };
