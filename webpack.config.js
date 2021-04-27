@@ -9,7 +9,7 @@ module.exports = {
     port: 8080,
   },
   entry: {
-    main: './src/index.js',
+    main: './src/app.js',
   },
   output: {
     filename: '[name].js',
