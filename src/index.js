@@ -1,8 +1,7 @@
 import 'bootstrap';
 import * as yup from 'yup';
 import axios from 'axios';
-import uniqueId from 'lodash/uniqueId';
-import differenceWith from 'lodash/differenceWith';
+import _ from 'lodash';
 import has from 'lodash/has';
 import i18next from 'i18next';
 
@@ -18,11 +17,7 @@ const decorateUrlWithProxy = (url) => {
   return decorated.toString();
 };
 
-const applySelectors = (obj) => (
-  Object.fromEntries(Object.entries(obj).map(
-    ([key, selector]) => ([key, document.querySelector(selector)]),
-  ))
-);
+const applySelectors = (obj) => _.mapValues(obj, (selector) => document.querySelector(selector));
 
 const urlValidationSchema = yup.string().url().required();
 
@@ -39,7 +34,6 @@ const validateUrl = (url, feeds) => {
 };
 
 // Код добавим какой нужно, если нет.
-// Кстати, МБ можно полагаться на message.
 const getErrorCode = (e) => {
   if (e.isAxiosError) {
     e.code = 'network_error';
@@ -53,9 +47,9 @@ const loadRss = (state, url) => {
     .then(({ data }) => {
       const { title, description, items } = parseRss(data.contents);
       const feed = {
-        url, id: uniqueId(), title, description,
+        url, id: _.uniqueId(), title, description,
       };
-      const posts = items.map((item) => ({ ...item, channelId: feed.id, id: uniqueId() }));
+      const posts = items.map((item) => ({ ...item, channelId: feed.id, id: _.uniqueId() }));
       state.posts.unshift(...posts);
       state.feeds.unshift(feed);
       state.loadingProcess.error = null;
@@ -82,8 +76,8 @@ const fetchUpdates = (state) => {
       const { items } = parseRss(data.contents);
       const newPosts = items.map((item) => ({ ...item, channelId: feed.id }));
       const oldPosts = state.posts.filter((post) => post.channelId === feed.id);
-      const posts = differenceWith(newPosts, oldPosts, (p1, p2) => p1.link === p2.link)
-        .map((post) => ({ ...post, id: uniqueId() }));
+      const posts = _.differenceWith(newPosts, oldPosts, (p1, p2) => p1.link === p2.link)
+        .map((post) => ({ ...post, id: _.uniqueId() }));
       if (posts.length > 0) {
         state.posts.unshift(...posts);
       }

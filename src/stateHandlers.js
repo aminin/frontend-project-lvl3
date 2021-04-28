@@ -115,18 +115,20 @@ const handlePreviewPost = (elements, state) => {
   fullArticleLink.href = post.link;
 };
 
+const handlers = {
+  form: handleForm,
+  'loadingProcess.status': handleLoadingProcessStatus,
+  feeds: handleFeeds,
+  posts: handlePosts,
+  'ui.seenPosts': handlePosts,
+  'modal.postId': handlePreviewPost,
+};
+
 const attachStateHandlers = (elements, initialState, translate) => (
-  onChange(initialState, (path) => {
-    const handlers = {
-      form: handleForm,
-      'loadingProcess.status': handleLoadingProcessStatus,
-      feeds: handleFeeds,
-      posts: handlePosts,
-      'ui.seenPosts': handlePosts,
-      'modal.postId': handlePreviewPost,
-    };
-    return handlers[path] && handlers[path](elements, initialState, translate);
-  })
+  onChange(
+    initialState,
+    (path) => handlers[path]?.(elements, initialState, translate),
+  )
 );
 
 export default attachStateHandlers;
