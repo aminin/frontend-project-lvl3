@@ -106,6 +106,9 @@ const handlePosts = (elements, state, translate) => {
 
 const handlePreviewPost = (elements, state) => {
   const post = state.posts.find((postData) => postData.id === state.modal.postId);
+
+  if (!post) return;
+
   const title = elements.modal.querySelector('.modal-title');
   const body = elements.modal.querySelector('.modal-body');
   const fullArticleLink = elements.modal.querySelector('.full-article');
@@ -131,4 +134,13 @@ const attachStateHandlers = (elements, initialState, translate) => (
   )
 );
 
-export default attachStateHandlers;
+const applyTranslations = (elements, translate) => {
+  elements.h1.innerText = translate('h1');
+  elements.lead.innerText = translate('lead');
+  elements.example.innerText = translate('example');
+  elements.submit.innerText = translate('submit');
+  elements.modalReadAll.innerText = translate('modalReadAll');
+  elements.modalClose.innerText = translate('modalClose');
+};
+
+export { attachStateHandlers, applyTranslations };

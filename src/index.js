@@ -6,7 +6,7 @@ import has from 'lodash/has';
 import i18next from 'i18next';
 
 import parseRss from './parseRss';
-import attachStateHandlers from './stateHandlers';
+import { attachStateHandlers, applyTranslations } from './view';
 import { RSS_LOAD_TIMEOUT, RSS_UPDATE_TIMEOUT, RSS_PROXY_URL } from './constants';
 import locales from './locales/index';
 
@@ -100,6 +100,12 @@ export default () => {
     feeds: '.feeds',
     posts: '.posts',
     modal: '#modal',
+    // Для переводов
+    modalReadAll: '#modal .full-article',
+    modalClose: '#modal .modal-footer [data-dismiss=modal]',
+    h1: 'h1',
+    lead: '.lead',
+    example: '.text-muted',
   });
 
   const initialState = {
@@ -127,6 +133,7 @@ export default () => {
     debug: false,
     resources: locales,
   }).then((translate) => {
+    applyTranslations(elements, translate);
     const state = attachStateHandlers(elements, initialState, translate);
 
     elements.form.addEventListener('submit', (e) => {
